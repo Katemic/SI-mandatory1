@@ -1,0 +1,6 @@
+@Library.gRPCApi_HostAddress = http://localhost:5030
+
+GET {{Library.gRPCApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

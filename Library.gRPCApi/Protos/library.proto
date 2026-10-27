@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+option csharp_namespace = "Library.gRPCApi";
+
+package library;
+
+service LibraryService {
+  rpc GetBookById(GetBookByIdRequest) returns (Book);
+  rpc CreateBook(CreateBookRequest) returns (CreateBookResponse);
+  rpc WatchBooks(WatchBooksRequest) returns (stream Book);
+}
+
+message GetBookByIdRequest {
+  int32 book_id = 1;
+}
+
+message CreateBookRequest {
+  string name = 1;
+  int32 author_id = 2;
+  int32 publisher_id = 3;
+  int32 publication_year = 4;
+}
+
+message CreateBookResponse {
+  Book book = 1;
+}
+
+message WatchBooksRequest {
+}
+
+message Book {
+  int32 id = 1;
+  string name = 2;
+  int32 author_id = 3;
+  int32 publisher_id = 4;
+  int32 publication_year = 5;
+}
