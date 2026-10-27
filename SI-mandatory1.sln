@@ -1,11 +1,18 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.37216.2 d17.14
+VisualStudioVersion = 17.14.37216.2
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Library.Data", "Library.Data\Library.Data.csproj", "{A8B7F8E2-F037-4ED9-A065-DBF8D5D1906C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Library.GraphQLApi", "Library.GraphQLApi\Library.GraphQLApi.csproj", "{0737B8AD-1317-42D5-A302-15B5A86A3269}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RestApi", "RestApi\RestApi.csproj", "{878DF9EF-4ED6-4EE4-B0FD-71E014EFD2EC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
+	ProjectSection(SolutionItems) = preProject
+		.env = .env
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +28,10 @@ Global
 		{0737B8AD-1317-42D5-A302-15B5A86A3269}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0737B8AD-1317-42D5-A302-15B5A86A3269}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0737B8AD-1317-42D5-A302-15B5A86A3269}.Release|Any CPU.Build.0 = Release|Any CPU
+		{878DF9EF-4ED6-4EE4-B0FD-71E014EFD2EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{878DF9EF-4ED6-4EE4-B0FD-71E014EFD2EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{878DF9EF-4ED6-4EE4-B0FD-71E014EFD2EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{878DF9EF-4ED6-4EE4-B0FD-71E014EFD2EC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
