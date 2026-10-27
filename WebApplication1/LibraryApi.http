@@ -1,0 +1,53 @@
+﻿
+@baseUrl = http://localhost:5002
+
+POST {{baseUrl}}/soap/library
+Content-Type: text/xml; charset=utf-8
+SOAPAction: "http://example.com/library/ILibraryService/CreateAuthor"
+
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:lib="http://example.com/library">
+  <soap:Body>
+    <lib:CreateAuthor>
+      <lib:request>
+        <lib:name>Robert</lib:name>
+        <lib:surname>Martin</lib:surname>
+      </lib:request>
+    </lib:CreateAuthor>
+  </soap:Body>
+</soap:Envelope>
+
+
+### Create a publishing company
+POST {{baseUrl}}/soap/library
+Content-Type: text/xml; charset=utf-8
+SOAPAction: "http://example.com/library/ILibraryService/CreatePublishingCompany"
+
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:lib="http://example.com/library">
+  <soap:Body>
+    <lib:CreatePublishingCompany>
+      <lib:request>
+        <lib:name>Prentice Hall</lib:name>
+      </lib:request>
+    </lib:CreatePublishingCompany>
+  </soap:Body>
+</soap:Envelope>
+
+
+### Create a book
+POST {{baseUrl}}/soap/library
+Content-Type: text/xml; charset=utf-8
+SOAPAction: "http://example.com/library/ILibraryService/CreateBook"
+
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:lib="http://example.com/library">
+  <soap:Body>
+    <lib:CreateBook>
+      <lib:request>
+        <lib:title>Clean Code</lib:title>
+        <lib:authorId>1</lib:authorId>
+        <lib:publishingCompanyId>1</lib:publishingCompanyId>
+        <lib:publishingYear>2008</lib:publishingYear>
+      </lib:request>
+    </lib:CreateBook>
+  </soap:Body>
+</soap:Envelope>
+

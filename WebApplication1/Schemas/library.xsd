@@ -1,0 +1,264 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:tns="http://example.com/library"
+    targetNamespace="http://example.com/library"
+    elementFormDefault="qualified">
+
+	<!-- Domain types -->
+
+	<xs:complexType name="Book">
+		<xs:sequence>
+			<xs:element name="id" type="xs:int"/>
+			<xs:element name="title" type="xs:string"/>
+			<xs:element name="authorId" type="xs:int"/>
+			<xs:element name="publishingCompanyId" type="xs:int"/>
+			<xs:element name="publishingYear" type="xs:int">
+				<xs:annotation>
+					<xs:documentation>
+						Must be at least 1900.
+						Enforced by service validation.
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="Author">
+		<xs:sequence>
+			<xs:element name="id" type="xs:int"/>
+			<xs:element name="name" type="xs:string"/>
+			<xs:element name="surname" type="xs:string"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="PublishingCompany">
+		<xs:sequence>
+			<xs:element name="id" type="xs:int"/>
+			<xs:element name="name" type="xs:string"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<!-- Reusable response types -->
+
+	<xs:complexType name="IdResponse">
+		<xs:sequence>
+			<xs:element name="id" type="xs:int"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="Acknowledgement">
+		<xs:sequence>
+			<xs:element name="success" type="xs:boolean"/>
+			<xs:element name="message" type="xs:string"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="AuthorList">
+		<xs:sequence>
+			<xs:element name="author"
+                        type="tns:Author"
+                        minOccurs="0"
+                        maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="PublishingCompanyList">
+		<xs:sequence>
+			<xs:element name="publishingCompany"
+                        type="tns:PublishingCompany"
+                        minOccurs="0"
+                        maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<!-- Fault details -->
+
+	<xs:complexType name="FaultDetail">
+		<xs:sequence>
+			<xs:element name="code" type="xs:string"/>
+			<xs:element name="message" type="xs:string"/>
+			<xs:element name="field"
+                        type="xs:string"
+                        minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<!-- Book requests -->
+
+	<xs:element name="CreateBookRequest">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="title" type="xs:string"/>
+				<xs:element name="authorId" type="xs:int"/>
+				<xs:element name="publishingCompanyId"
+                            type="xs:int"/>
+				<xs:element name="publishingYear">
+					<xs:simpleType>
+						<xs:restriction base="xs:int">
+							<xs:minInclusive value="1900"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="CreateBookResponse"
+                type="tns:IdResponse"/>
+
+	<xs:element name="GetBookByIdRequest">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="id" type="xs:int"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="GetBookByIdResponse"
+                type="tns:Book"/>
+
+	<xs:element name="UpdateBookRequest">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="id" type="xs:int"/>
+				<xs:element name="title" type="xs:string"/>
+				<xs:element name="authorId" type="xs:int"/>
+				<xs:element name="publishingCompanyId"
+                            type="xs:int"/>
+				<xs:element name="publishingYear">
+					<xs:simpleType>
+						<xs:restriction base="xs:int">
+							<xs:minInclusive value="1900"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="UpdateBookResponse"
+                type="tns:Acknowledgement"/>
+
+	<xs:element name="DeleteBookRequest">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="id" type="xs:int"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="DeleteBookResponse"
+                type="tns:Acknowledgement"/>
+
+	<!-- Author requests -->
+
+	<xs:element name="CreateAuthorRequest">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="name" type="xs:string"/>
+				<xs:element name="surname" type="xs:string"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="CreateAuthorResponse"
+                type="tns:IdResponse"/>
+
+	<xs:element name="GetAuthorByIdRequest">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="id" type="xs:int"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="GetAuthorByIdResponse"
+                type="tns:Author"/>
+
+	<xs:element name="ListAuthorsRequest">
+		<xs:complexType/>
+	</xs:element>
+
+	<xs:element name="ListAuthorsResponse"
+                type="tns:AuthorList"/>
+
+	<xs:element name="UpdateAuthorRequest">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="id" type="xs:int"/>
+				<xs:element name="name" type="xs:string"/>
+				<xs:element name="surname" type="xs:string"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="UpdateAuthorResponse"
+                type="tns:Acknowledgement"/>
+
+	<xs:element name="DeleteAuthorRequest">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="id" type="xs:int"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="DeleteAuthorResponse"
+                type="tns:Acknowledgement"/>
+
+	<!-- Publishing company requests -->
+
+	<xs:element name="CreatePublishingCompanyRequest">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="name" type="xs:string"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="CreatePublishingCompanyResponse"
+                type="tns:IdResponse"/>
+
+	<xs:element name="GetPublishingCompanyByIdRequest">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="id" type="xs:int"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="GetPublishingCompanyByIdResponse"
+                type="tns:PublishingCompany"/>
+
+	<xs:element name="ListPublishingCompaniesRequest">
+		<xs:complexType/>
+	</xs:element>
+
+	<xs:element name="ListPublishingCompaniesResponse"
+                type="tns:PublishingCompanyList"/>
+
+	<xs:element name="UpdatePublishingCompanyRequest">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="id" type="xs:int"/>
+				<xs:element name="name" type="xs:string"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="UpdatePublishingCompanyResponse"
+                type="tns:Acknowledgement"/>
+
+	<xs:element name="DeletePublishingCompanyRequest">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="id" type="xs:int"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="DeletePublishingCompanyResponse"
+                type="tns:Acknowledgement"/>
+
+</xs:schema>
