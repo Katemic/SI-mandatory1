@@ -1,7 +1,6 @@
 using Library.Data.Context;
 using Library.Data.Repositories;
 using Microsoft.EntityFrameworkCore;
-using RestApi.Endpoints;
 
 internal class Program
 {
@@ -26,20 +25,27 @@ internal class Program
         // Register shared repositories
         builder.Services.AddLibraryRepositories();
 
+        // Register controllers
+        builder.Services.AddControllers();
 
+        // Swagger support (if you use Swagger)
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGen();
 
         // Add services to the container.
-
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.
-
         app.UseHttpsRedirection();
 
-        app.MapBookEndpoints();
-        app.MapAuthorEndpoints();
-        app.MapPublisherEndpoints();
+        // Enable Swagger
+        if (app.Environment.IsDevelopment())
+        {
+            app.UseSwagger();
+            app.UseSwaggerUI();
+        }
 
+        app.MapControllers();
 
         app.Run();
     }

@@ -1,6 +1,6 @@
 ﻿using RestApi.DTOs;
 
-namespace RestApi.Endpoints
+namespace RestApi.Controllers
 {
     public static class HateoasHelper
     {
