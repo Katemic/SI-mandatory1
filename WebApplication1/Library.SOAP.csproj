@@ -4,12 +4,17 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>e3b0707c-04de-47e5-a473-d03ec7d6e807</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="CoreWCF.Http" Version="1.9.1" />
     <PackageReference Include="CoreWCF.Primitives" Version="1.9.1" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.11" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Library.Data\Library.Data.csproj" />
   </ItemGroup>
 
 </Project>

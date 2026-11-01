@@ -1,6 +1,14 @@
 ﻿
 @baseUrl = http://localhost:5002
 
+# Udfyld ID'erne fra Create-operationernes svar
+# Brug kun ID'er på testdata, du selv har oprettet
+@authorId = 0
+@companyId = 0
+@bookId = 0
+
+
+### 1. CREATE AUTHOR
 POST {{baseUrl}}/soap/library
 Content-Type: text/xml; charset=utf-8
 SOAPAction: "http://example.com/library/ILibraryService/CreateAuthor"
@@ -9,15 +17,79 @@ SOAPAction: "http://example.com/library/ILibraryService/CreateAuthor"
   <soap:Body>
     <lib:CreateAuthor>
       <lib:request>
-        <lib:name>Robert</lib:name>
-        <lib:surname>Martin</lib:surname>
+        <lib:name>Test</lib:name>
+        <lib:surname>Author</lib:surname>
       </lib:request>
     </lib:CreateAuthor>
   </soap:Body>
 </soap:Envelope>
 
 
-### Create a publishing company
+### 2. GET AUTHOR BY ID
+POST {{baseUrl}}/soap/library
+Content-Type: text/xml; charset=utf-8
+SOAPAction: "http://example.com/library/ILibraryService/GetAuthorById"
+
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:lib="http://example.com/library">
+  <soap:Body>
+    <lib:GetAuthorById>
+      <lib:request>
+        <lib:id>{{authorId}}</lib:id>
+      </lib:request>
+    </lib:GetAuthorById>
+  </soap:Body>
+</soap:Envelope>
+
+
+### 3. LIST ALL AUTHORS
+POST {{baseUrl}}/soap/library
+Content-Type: text/xml; charset=utf-8
+SOAPAction: "http://example.com/library/ILibraryService/ListAuthors"
+
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:lib="http://example.com/library">
+  <soap:Body>
+    <lib:ListAuthors>
+      <request />
+    </lib:ListAuthors>
+  </soap:Body>
+</soap:Envelope>
+
+
+### 4. UPDATE AUTHOR
+POST {{baseUrl}}/soap/library
+Content-Type: text/xml; charset=utf-8
+SOAPAction: "http://example.com/library/ILibraryService/UpdateAuthor"
+
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:lib="http://example.com/library">
+  <soap:Body>
+    <lib:UpdateAuthor>
+      <lib:request>
+        <lib:id>{{authorId}}</lib:id>
+        <lib:name>Updated Test</lib:name>
+        <lib:surname>Author</lib:surname>
+      </lib:request>
+    </lib:UpdateAuthor>
+  </soap:Body>
+</soap:Envelope>
+
+
+### 5. DELETE AUTHOR
+POST {{baseUrl}}/soap/library
+Content-Type: text/xml; charset=utf-8
+SOAPAction: "http://example.com/library/ILibraryService/DeleteAuthor"
+
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:lib="http://example.com/library">
+  <soap:Body>
+    <lib:DeleteAuthor>
+      <lib:request>
+        <lib:id>{{authorId}}</lib:id>
+      </lib:request>
+    </lib:DeleteAuthor>
+  </soap:Body>
+</soap:Envelope>
+
+
+### 6. CREATE PUBLISHING COMPANY
 POST {{baseUrl}}/soap/library
 Content-Type: text/xml; charset=utf-8
 SOAPAction: "http://example.com/library/ILibraryService/CreatePublishingCompany"
@@ -26,14 +98,77 @@ SOAPAction: "http://example.com/library/ILibraryService/CreatePublishingCompany"
   <soap:Body>
     <lib:CreatePublishingCompany>
       <lib:request>
-        <lib:name>Prentice Hall</lib:name>
+        <lib:name>Test Publishing</lib:name>
       </lib:request>
     </lib:CreatePublishingCompany>
   </soap:Body>
 </soap:Envelope>
 
 
-### Create a book
+### 7. GET PUBLISHING COMPANY BY ID
+POST {{baseUrl}}/soap/library
+Content-Type: text/xml; charset=utf-8
+SOAPAction: "http://example.com/library/ILibraryService/GetPublishingCompanyById"
+
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:lib="http://example.com/library">
+  <soap:Body>
+    <lib:GetPublishingCompanyById>
+      <lib:request>
+        <lib:id>{{companyId}}</lib:id>
+      </lib:request>
+    </lib:GetPublishingCompanyById>
+  </soap:Body>
+</soap:Envelope>
+
+
+### 8. LIST PUBLISHING COMPANIES
+POST {{baseUrl}}/soap/library
+Content-Type: text/xml; charset=utf-8
+SOAPAction: "http://example.com/library/ILibraryService/ListPublishingCompanies"
+
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:lib="http://example.com/library">
+  <soap:Body>
+    <lib:ListPublishingCompanies>
+      <request />
+    </lib:ListPublishingCompanies>
+  </soap:Body>
+</soap:Envelope>
+
+
+### 9. UPDATE PUBLISHING COMPANY
+POST {{baseUrl}}/soap/library
+Content-Type: text/xml; charset=utf-8
+SOAPAction: "http://example.com/library/ILibraryService/UpdatePublishingCompany"
+
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:lib="http://example.com/library">
+  <soap:Body>
+    <lib:UpdatePublishingCompany>
+      <lib:request>
+        <lib:id>{{companyId}}</lib:id>
+        <lib:name>Updated Test Publishing</lib:name>
+      </lib:request>
+    </lib:UpdatePublishingCompany>
+  </soap:Body>
+</soap:Envelope>
+
+
+### 10. DELETE PUBLISHING COMPANY
+POST {{baseUrl}}/soap/library
+Content-Type: text/xml; charset=utf-8
+SOAPAction: "http://example.com/library/ILibraryService/DeletePublishingCompany"
+
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:lib="http://example.com/library">
+  <soap:Body>
+    <lib:DeletePublishingCompany>
+      <lib:request>
+        <lib:id>{{companyId}}</lib:id>
+      </lib:request>
+    </lib:DeletePublishingCompany>
+  </soap:Body>
+</soap:Envelope>
+
+
+### 11. CREATE BOOK
 POST {{baseUrl}}/soap/library
 Content-Type: text/xml; charset=utf-8
 SOAPAction: "http://example.com/library/ILibraryService/CreateBook"
@@ -42,12 +177,63 @@ SOAPAction: "http://example.com/library/ILibraryService/CreateBook"
   <soap:Body>
     <lib:CreateBook>
       <lib:request>
-        <lib:title>Clean Code</lib:title>
-        <lib:authorId>1</lib:authorId>
-        <lib:publishingCompanyId>1</lib:publishingCompanyId>
-        <lib:publishingYear>2008</lib:publishingYear>
+        <lib:title>Test Book</lib:title>
+        <lib:authorId>{{authorId}}</lib:authorId>
+        <lib:publishingCompanyId>{{companyId}}</lib:publishingCompanyId>
+        <lib:publishingYear>2025</lib:publishingYear>
       </lib:request>
     </lib:CreateBook>
   </soap:Body>
 </soap:Envelope>
 
+
+### 12. GET BOOK BY ID
+POST {{baseUrl}}/soap/library
+Content-Type: text/xml; charset=utf-8
+SOAPAction: "http://example.com/library/ILibraryService/GetBookById"
+
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:lib="http://example.com/library">
+  <soap:Body>
+    <lib:GetBookById>
+      <lib:request>
+        <lib:id>{{bookId}}</lib:id>
+      </lib:request>
+    </lib:GetBookById>
+  </soap:Body>
+</soap:Envelope>
+
+
+### 13. UPDATE BOOK
+POST {{baseUrl}}/soap/library
+Content-Type: text/xml; charset=utf-8
+SOAPAction: "http://example.com/library/ILibraryService/UpdateBook"
+
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:lib="http://example.com/library">
+  <soap:Body>
+    <lib:UpdateBook>
+      <lib:request>
+        <lib:id>{{bookId}}</lib:id>
+        <lib:title>Updated Test Book</lib:title>
+        <lib:authorId>{{authorId}}</lib:authorId>
+        <lib:publishingCompanyId>{{companyId}}</lib:publishingCompanyId>
+        <lib:publishingYear>2026</lib:publishingYear>
+      </lib:request>
+    </lib:UpdateBook>
+  </soap:Body>
+</soap:Envelope>
+
+
+### 14. DELETE BOOK
+POST {{baseUrl}}/soap/library
+Content-Type: text/xml; charset=utf-8
+SOAPAction: "http://example.com/library/ILibraryService/DeleteBook"
+
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:lib="http://example.com/library">
+  <soap:Body>
+    <lib:DeleteBook>
+      <lib:request>
+        <lib:id>{{bookId}}</lib:id>
+      </lib:request>
+    </lib:DeleteBook>
+  </soap:Body>
+</soap:Envelope>

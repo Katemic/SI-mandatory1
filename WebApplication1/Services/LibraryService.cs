@@ -1,277 +1,348 @@
 ﻿
 using CoreWCF;
+using Library.Data.Context;
+using Library.Data.Models;
+using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.ServiceModel;
 
 public class LibraryService : ILibraryService
 {
-    private static readonly Dictionary<int, Book> Books = new();
-    private static readonly Dictionary<int, Author> Authors = new();
-    private static readonly Dictionary<int, PublishingCompany> Companies = new();
+    private readonly LibraryDbContext _db;
 
-    private static int nextBookId = 1;
-    private static int nextAuthorId = 1;
-    private static int nextCompanyId = 1;
+    public LibraryService(LibraryDbContext db)
+    {
+        _db = db;
+    }
 
-    private static readonly object Gate = new();
-
-    private static void ValidateText(string? value, string field)
+    private static void ValidateText(
+        string? value, string field, int maxLength)
     {
         if (string.IsNullOrWhiteSpace(value))
             throw new FaultException($"{field} is required.");
+
+        if (value.Trim().Length > maxLength)
+            throw new FaultException(
+                $"{field} cannot exceed {maxLength} characters.");
     }
 
-    private static void ValidateBook(CreateBookRequest request)
+    private static Acknowledgement Ack(string message)
     {
-        ValidateText(request.title, "title");
+        return new Acknowledgement
+        {
+            success = true,
+            message = message
+        };
+    }
 
-        if (request.publishingYear < 1900)
+    private void ValidateBook(
+        string title, int authorId,
+        int companyId, int year)
+    {
+        ValidateText(title, "title", 255);
+
+        if (year < 1900)
             throw new FaultException(
                 "Publishing year must be at least 1900.");
 
-        if (!Authors.ContainsKey(request.authorId))
+        if (!_db.Tauthors.Any(a => a.NAuthorId == authorId))
             throw new FaultException("Author does not exist.");
 
-        if (!Companies.ContainsKey(request.publishingCompanyId))
+        if (!_db.Tpublishingcompanies.Any(
+            c => c.NPublishingCompanyId == companyId))
             throw new FaultException(
                 "Publishing company does not exist.");
     }
 
-    private static Acknowledgement Ack(string message) =>
-        new() { success = true, message = message };
+    // AUTHORS
 
     public IdResponse CreateAuthor(CreateAuthorRequest request)
     {
-        lock (Gate)
+        if (request == null)
+            throw new FaultException("Request cannot be null.");
+
+        ValidateText(request.name, "name", 40);
+        ValidateText(request.surname, "surname", 60);
+
+        var author = new Tauthor
         {
-            if (request == null)
-                throw new FaultException("Request cannot be null.");
+            CName = request.name.Trim(),
+            CSurname = request.surname.Trim()
+        };
 
-            ValidateText(request.name, "name");
-            ValidateText(request.surname, "surname");
+        _db.Tauthors.Add(author);
+        _db.SaveChanges();
 
-            int id = nextAuthorId++;
-
-            Authors[id] = new Author
-            {
-                id = id,
-                name = request.name.Trim(),
-                surname = request.surname.Trim()
-            };
-
-            return new IdResponse { id = id };
-        }
-    }
-
-    public IdResponse CreatePublishingCompany(
-        CreatePublishingCompanyRequest request)
-    {
-        lock (Gate)
-        {
-            ValidateText(request.name, "name");
-
-            int id = nextCompanyId++;
-            Companies[id] = new PublishingCompany
-            {
-                id = id,
-                name = request.name.Trim()
-            };
-
-            return new IdResponse { id = id };
-        }
-    }
-
-    public IdResponse CreateBook(CreateBookRequest request)
-    {
-        lock (Gate)
-        {
-            ValidateBook(request);
-
-            int id = nextBookId++;
-            Books[id] = new Book
-            {
-                id = id,
-                title = request.title.Trim(),
-                authorId = request.authorId,
-                publishingCompanyId = request.publishingCompanyId,
-                publishingYear = request.publishingYear
-            };
-
-            return new IdResponse { id = id };
-        }
-    }
-
-    public Book GetBookById(GetBookByIdRequest request)
-    {
-        lock (Gate)
-        {
-            if (!Books.TryGetValue(request.id, out var book))
-                throw new FaultException("Book not found.");
-
-            return book;
-        }
+        return new IdResponse { id = author.NAuthorId };
     }
 
     public Author GetAuthorById(GetAuthorByIdRequest request)
     {
-        lock (Gate)
-        {
-            if (!Authors.TryGetValue(request.id, out var author))
-                throw new FaultException("Author not found.");
+        if (request == null)
+            throw new FaultException("Request cannot be null.");
 
-            return author;
-        }
+        var author = _db.Tauthors.Find(request.id);
+
+        if (author == null)
+            throw new FaultException("Author not found.");
+
+        return new Author
+        {
+            id = author.NAuthorId,
+            name = author.CName,
+            surname = author.CSurname
+        };
     }
 
     public AuthorList ListAuthors(ListAuthorsRequest request)
     {
-        lock (Gate)
-        {
-            return new AuthorList
+        var authors = _db.Tauthors
+            .AsNoTracking()
+            .OrderBy(a => a.NAuthorId)
+            .Select(a => new Author
             {
-                author = Authors.Values.ToArray()
-            };
-        }
+                id = a.NAuthorId,
+                name = a.CName,
+                surname = a.CSurname
+            })
+            .ToArray();
+
+        return new AuthorList { author = authors };
+    }
+
+    public Acknowledgement UpdateAuthor(UpdateAuthorRequest request)
+    {
+        if (request == null)
+            throw new FaultException("Request cannot be null.");
+
+        var author = _db.Tauthors.Find(request.id);
+
+        if (author == null)
+            throw new FaultException("Author not found.");
+
+        ValidateText(request.name, "name", 40);
+        ValidateText(request.surname, "surname", 60);
+
+        author.CName = request.name.Trim();
+        author.CSurname = request.surname.Trim();
+
+        _db.SaveChanges();
+
+        return Ack("Author updated.");
+    }
+
+    public Acknowledgement DeleteAuthor(DeleteAuthorRequest request)
+    {
+        if (request == null)
+            throw new FaultException("Request cannot be null.");
+
+        var author = _db.Tauthors.Find(request.id);
+
+        if (author == null)
+            throw new FaultException("Author not found.");
+
+        if (_db.Tbooks.Any(b => b.NAuthorId == request.id))
+            throw new FaultException(
+                "Cannot delete an author referenced by a book.");
+
+        _db.Tauthors.Remove(author);
+        _db.SaveChanges();
+
+        return Ack("Author deleted.");
+    }
+
+    // PUBLISHING COMPANIES
+
+    public IdResponse CreatePublishingCompany(
+        CreatePublishingCompanyRequest request)
+    {
+        if (request == null)
+            throw new FaultException("Request cannot be null.");
+
+        ValidateText(request.name, "name", 40);
+
+        var company = new Tpublishingcompany
+        {
+            CName = request.name.Trim()
+        };
+
+        _db.Tpublishingcompanies.Add(company);
+        _db.SaveChanges();
+
+        return new IdResponse
+        {
+            id = company.NPublishingCompanyId
+        };
     }
 
     public PublishingCompany GetPublishingCompanyById(
         GetPublishingCompanyByIdRequest request)
     {
-        lock (Gate)
-        {
-            if (!Companies.TryGetValue(request.id, out var company))
-                throw new FaultException(
-                    "Publishing company not found.");
+        if (request == null)
+            throw new FaultException("Request cannot be null.");
 
-            return company;
-        }
+        var company = _db.Tpublishingcompanies.Find(request.id);
+
+        if (company == null)
+            throw new FaultException(
+                "Publishing company not found.");
+
+        return new PublishingCompany
+        {
+            id = company.NPublishingCompanyId,
+            name = company.CName
+        };
     }
 
     public PublishingCompanyList ListPublishingCompanies(
         ListPublishingCompaniesRequest request)
     {
-        lock (Gate)
+        var companies = _db.Tpublishingcompanies
+            .AsNoTracking()
+            .OrderBy(c => c.NPublishingCompanyId)
+            .Select(c => new PublishingCompany
+            {
+                id = c.NPublishingCompanyId,
+                name = c.CName
+            })
+            .ToArray();
+
+        return new PublishingCompanyList
         {
-            return new PublishingCompanyList
-            {
-                publishingCompany = Companies.Values.ToArray()
-            };
-        }
-    }
-
-    public Acknowledgement UpdateBook(UpdateBookRequest request)
-    {
-        lock (Gate)
-        {
-            if (!Books.ContainsKey(request.id))
-                throw new FaultException("Book not found.");
-
-            ValidateBook(new CreateBookRequest
-            {
-                title = request.title,
-                authorId = request.authorId,
-                publishingCompanyId = request.publishingCompanyId,
-                publishingYear = request.publishingYear
-            });
-
-            Books[request.id] = new Book
-            {
-                id = request.id,
-                title = request.title.Trim(),
-                authorId = request.authorId,
-                publishingCompanyId = request.publishingCompanyId,
-                publishingYear = request.publishingYear
-            };
-
-            return Ack("Book updated.");
-        }
-    }
-
-    public Acknowledgement UpdateAuthor(UpdateAuthorRequest request)
-    {
-        lock (Gate)
-        {
-            if (!Authors.ContainsKey(request.id))
-                throw new FaultException("Author not found.");
-
-            ValidateText(request.name, "name");
-            ValidateText(request.surname, "surname");
-
-            Authors[request.id] = new Author
-            {
-                id = request.id,
-                name = request.name.Trim(),
-                surname = request.surname.Trim()
-            };
-
-            return Ack("Author updated.");
-        }
+            publishingCompany = companies
+        };
     }
 
     public Acknowledgement UpdatePublishingCompany(
         UpdatePublishingCompanyRequest request)
     {
-        lock (Gate)
-        {
-            if (!Companies.ContainsKey(request.id))
-                throw new FaultException(
-                    "Publishing company not found.");
+        if (request == null)
+            throw new FaultException("Request cannot be null.");
 
-            ValidateText(request.name, "name");
+        var company = _db.Tpublishingcompanies.Find(request.id);
 
-            Companies[request.id] = new PublishingCompany
-            {
-                id = request.id,
-                name = request.name.Trim()
-            };
+        if (company == null)
+            throw new FaultException(
+                "Publishing company not found.");
 
-            return Ack("Publishing company updated.");
-        }
-    }
+        ValidateText(request.name, "name", 40);
 
-    public Acknowledgement DeleteBook(DeleteBookRequest request)
-    {
-        lock (Gate)
-        {
-            if (!Books.Remove(request.id))
-                throw new FaultException("Book not found.");
+        company.CName = request.name.Trim();
 
-            return Ack("Book deleted.");
-        }
-    }
+        _db.SaveChanges();
 
-    public Acknowledgement DeleteAuthor(DeleteAuthorRequest request)
-    {
-        lock (Gate)
-        {
-            if (!Authors.ContainsKey(request.id))
-                throw new FaultException("Author not found.");
-
-            if (Books.Values.Any(b => b.authorId == request.id))
-                throw new FaultException(
-                    "Cannot delete an author referenced by a book.");
-
-            Authors.Remove(request.id);
-            return Ack("Author deleted.");
-        }
+        return Ack("Publishing company updated.");
     }
 
     public Acknowledgement DeletePublishingCompany(
         DeletePublishingCompanyRequest request)
     {
-        lock (Gate)
+        if (request == null)
+            throw new FaultException("Request cannot be null.");
+
+        var company = _db.Tpublishingcompanies.Find(request.id);
+
+        if (company == null)
+            throw new FaultException(
+                "Publishing company not found.");
+
+        if (_db.Tbooks.Any(
+            b => b.NPublishingCompanyId == request.id))
+            throw new FaultException(
+                "Cannot delete a publishing company referenced by a book.");
+
+        _db.Tpublishingcompanies.Remove(company);
+        _db.SaveChanges();
+
+        return Ack("Publishing company deleted.");
+    }
+
+    // BOOKS
+
+    public IdResponse CreateBook(CreateBookRequest request)
+    {
+        if (request == null)
+            throw new FaultException("Request cannot be null.");
+
+        ValidateBook(
+            request.title,
+            request.authorId,
+            request.publishingCompanyId,
+            request.publishingYear);
+
+        var book = new Tbook
         {
-            if (!Companies.ContainsKey(request.id))
-                throw new FaultException(
-                    "Publishing company not found.");
+            CTitle = request.title.Trim(),
+            NAuthorId = request.authorId,
+            NPublishingCompanyId = request.publishingCompanyId,
+            NPublishingYear = request.publishingYear
+        };
 
-            if (Books.Values.Any(
-                b => b.publishingCompanyId == request.id))
-                throw new FaultException(
-                    "Cannot delete a publishing company referenced by a book.");
+        _db.Tbooks.Add(book);
+        _db.SaveChanges();
 
-            Companies.Remove(request.id);
-            return Ack("Publishing company deleted.");
-        }
+        return new IdResponse { id = book.NBookId };
+    }
+
+    public Book GetBookById(GetBookByIdRequest request)
+    {
+        if (request == null)
+            throw new FaultException("Request cannot be null.");
+
+        var book = _db.Tbooks.Find(request.id);
+
+        if (book == null)
+            throw new FaultException("Book not found.");
+
+        return new Book
+        {
+            id = book.NBookId,
+            title = book.CTitle,
+            authorId = book.NAuthorId,
+            publishingCompanyId = book.NPublishingCompanyId,
+            publishingYear = book.NPublishingYear
+        };
+    }
+
+    public Acknowledgement UpdateBook(UpdateBookRequest request)
+    {
+        if (request == null)
+            throw new FaultException("Request cannot be null.");
+
+        var book = _db.Tbooks.Find(request.id);
+
+        if (book == null)
+            throw new FaultException("Book not found.");
+
+        ValidateBook(
+            request.title,
+            request.authorId,
+            request.publishingCompanyId,
+            request.publishingYear);
+
+        book.CTitle = request.title.Trim();
+        book.NAuthorId = request.authorId;
+        book.NPublishingCompanyId = request.publishingCompanyId;
+        book.NPublishingYear = request.publishingYear;
+
+        _db.SaveChanges();
+
+        return Ack("Book updated.");
+    }
+
+    public Acknowledgement DeleteBook(DeleteBookRequest request)
+    {
+        if (request == null)
+            throw new FaultException("Request cannot be null.");
+
+        var book = _db.Tbooks.Find(request.id);
+
+        if (book == null)
+            throw new FaultException("Book not found.");
+
+        _db.Tbooks.Remove(book);
+        _db.SaveChanges();
+
+        return Ack("Book deleted.");
     }
 }
