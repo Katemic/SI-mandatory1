@@ -25,8 +25,7 @@ namespace RestApi.Controllers
                 dto.Title.Length > 255 ||
                 dto.AuthorId <= 0 ||
                 dto.PublisherId <= 0 ||
-                dto.PublishingYear <= 0 ||
-                dto.PublishingYear > 9999)
+                dto.PublishingYear < 1900)
             {
                 return BadRequest("Invalid book data.");
             }
@@ -177,8 +176,7 @@ namespace RestApi.Controllers
                 dto.Title.Length > 255 ||
                 dto.AuthorId <= 0 ||
                 dto.PublisherId <= 0 ||
-                dto.PublishingYear <= 0 ||
-                dto.PublishingYear > 9999)
+                dto.PublishingYear < 1900)
             {
                 return BadRequest("Invalid book data.");
             }
