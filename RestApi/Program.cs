@@ -26,7 +26,11 @@ internal class Program
         builder.Services.AddLibraryRepositories();
 
         // Register controllers
-        builder.Services.AddControllers();
+        builder.Services.AddControllers(options =>
+        {
+            options.RespectBrowserAcceptHeader = true;
+            options.ReturnHttpNotAcceptable = true;
+        });
 
         // Swagger support (if you use Swagger)
         builder.Services.AddEndpointsApiExplorer();
