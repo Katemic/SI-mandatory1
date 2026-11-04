@@ -7,22 +7,23 @@
 
 	<!-- Domain types -->
 
+
 	<xs:complexType name="Book">
 		<xs:sequence>
 			<xs:element name="id" type="xs:int"/>
 			<xs:element name="title" type="xs:string"/>
 			<xs:element name="authorId" type="xs:int"/>
 			<xs:element name="publishingCompanyId" type="xs:int"/>
-			<xs:element name="publishingYear" type="xs:int">
-				<xs:annotation>
-					<xs:documentation>
-						Must be at least 1900.
-						Enforced by service validation.
-					</xs:documentation>
-				</xs:annotation>
+			<xs:element name="publishingYear">
+				<xs:simpleType>
+					<xs:restriction base="xs:int">
+						<xs:minInclusive value="1900"/>
+					</xs:restriction>
+				</xs:simpleType>
 			</xs:element>
 		</xs:sequence>
 	</xs:complexType>
+
 
 	<xs:complexType name="Author">
 		<xs:sequence>
@@ -83,6 +84,42 @@
                         minOccurs="0"/>
 		</xs:sequence>
 	</xs:complexType>
+
+	<!-- NEW: NotFoundFault -->
+
+	<xs:complexType name="NotFoundFault">
+		<xs:sequence>
+			<xs:element name="message" type="xs:string"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:element name="NotFoundFault"
+                type="tns:NotFoundFault"/>
+
+	<!-- NEW: ValidationFault -->
+
+	<xs:complexType name="ValidationFault">
+		<xs:sequence>
+			<xs:element name="message" type="xs:string"/>
+			<xs:element name="field"
+                        type="xs:string"
+                        minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:element name="ValidationFault"
+                type="tns:ValidationFault"/>
+
+	<!-- NEW: ConflictFault -->
+
+	<xs:complexType name="ConflictFault">
+		<xs:sequence>
+			<xs:element name="message" type="xs:string"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:element name="ConflictFault"
+                type="tns:ConflictFault"/>
 
 	<!-- Book requests -->
 

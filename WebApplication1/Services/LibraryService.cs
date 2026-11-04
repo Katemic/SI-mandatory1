@@ -4,7 +4,6 @@ using Library.Data.Context;
 using Library.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
-using System.ServiceModel;
 
 public class LibraryService : ILibraryService
 {
@@ -15,15 +14,19 @@ public class LibraryService : ILibraryService
         _db = db;
     }
 
+    // VALIDATION
+
     private static void ValidateText(
         string? value, string field, int maxLength)
     {
         if (string.IsNullOrWhiteSpace(value))
-            throw new FaultException($"{field} is required.");
+            throw SoapFaults.Validation(
+                $"{field} is required.", field);
 
         if (value.Trim().Length > maxLength)
-            throw new FaultException(
-                $"{field} cannot exceed {maxLength} characters.");
+            throw SoapFaults.Validation(
+                $"{field} cannot exceed {maxLength} characters.",
+                field);
     }
 
     private static Acknowledgement Ack(string message)
@@ -42,16 +45,20 @@ public class LibraryService : ILibraryService
         ValidateText(title, "title", 255);
 
         if (year < 1900)
-            throw new FaultException(
-                "Publishing year must be at least 1900.");
+            throw SoapFaults.Validation(
+                "Publishing year must be at least 1900.",
+                "publishingYear");
 
         if (!_db.Tauthors.Any(a => a.NAuthorId == authorId))
-            throw new FaultException("Author does not exist.");
+            throw SoapFaults.Validation(
+                "Author does not exist.",
+                "authorId");
 
         if (!_db.Tpublishingcompanies.Any(
             c => c.NPublishingCompanyId == companyId))
-            throw new FaultException(
-                "Publishing company does not exist.");
+            throw SoapFaults.Validation(
+                "Publishing company does not exist.",
+                "publishingCompanyId");
     }
 
     // AUTHORS
@@ -59,7 +66,8 @@ public class LibraryService : ILibraryService
     public IdResponse CreateAuthor(CreateAuthorRequest request)
     {
         if (request == null)
-            throw new FaultException("Request cannot be null.");
+            throw SoapFaults.Validation(
+                "Request cannot be null.");
 
         ValidateText(request.name, "name", 40);
         ValidateText(request.surname, "surname", 60);
@@ -84,7 +92,7 @@ public class LibraryService : ILibraryService
         var author = _db.Tauthors.Find(request.id);
 
         if (author == null)
-            throw new FaultException("Author not found.");
+            throw SoapFaults.NotFound("Author not found.");
 
         return new Author
         {
@@ -113,12 +121,13 @@ public class LibraryService : ILibraryService
     public Acknowledgement UpdateAuthor(UpdateAuthorRequest request)
     {
         if (request == null)
-            throw new FaultException("Request cannot be null.");
+            throw SoapFaults.Validation(
+                "Request cannot be null.");
 
         var author = _db.Tauthors.Find(request.id);
 
         if (author == null)
-            throw new FaultException("Author not found.");
+            throw SoapFaults.NotFound("Author not found.");
 
         ValidateText(request.name, "name", 40);
         ValidateText(request.surname, "surname", 60);
@@ -139,10 +148,10 @@ public class LibraryService : ILibraryService
         var author = _db.Tauthors.Find(request.id);
 
         if (author == null)
-            throw new FaultException("Author not found.");
+            throw SoapFaults.NotFound("Author not found.");
 
         if (_db.Tbooks.Any(b => b.NAuthorId == request.id))
-            throw new FaultException(
+            throw SoapFaults.Conflict(
                 "Cannot delete an author referenced by a book.");
 
         _db.Tauthors.Remove(author);
@@ -157,7 +166,8 @@ public class LibraryService : ILibraryService
         CreatePublishingCompanyRequest request)
     {
         if (request == null)
-            throw new FaultException("Request cannot be null.");
+            throw SoapFaults.Validation(
+                "Request cannot be null.");
 
         ValidateText(request.name, "name", 40);
 
@@ -184,7 +194,7 @@ public class LibraryService : ILibraryService
         var company = _db.Tpublishingcompanies.Find(request.id);
 
         if (company == null)
-            throw new FaultException(
+            throw SoapFaults.NotFound(
                 "Publishing company not found.");
 
         return new PublishingCompany
@@ -217,12 +227,13 @@ public class LibraryService : ILibraryService
         UpdatePublishingCompanyRequest request)
     {
         if (request == null)
-            throw new FaultException("Request cannot be null.");
+            throw SoapFaults.Validation(
+                "Request cannot be null.");
 
         var company = _db.Tpublishingcompanies.Find(request.id);
 
         if (company == null)
-            throw new FaultException(
+            throw SoapFaults.NotFound(
                 "Publishing company not found.");
 
         ValidateText(request.name, "name", 40);
@@ -243,12 +254,12 @@ public class LibraryService : ILibraryService
         var company = _db.Tpublishingcompanies.Find(request.id);
 
         if (company == null)
-            throw new FaultException(
+            throw SoapFaults.NotFound(
                 "Publishing company not found.");
 
         if (_db.Tbooks.Any(
             b => b.NPublishingCompanyId == request.id))
-            throw new FaultException(
+            throw SoapFaults.Conflict(
                 "Cannot delete a publishing company referenced by a book.");
 
         _db.Tpublishingcompanies.Remove(company);
@@ -262,7 +273,8 @@ public class LibraryService : ILibraryService
     public IdResponse CreateBook(CreateBookRequest request)
     {
         if (request == null)
-            throw new FaultException("Request cannot be null.");
+            throw SoapFaults.Validation(
+                "Request cannot be null.");
 
         ValidateBook(
             request.title,
@@ -292,7 +304,7 @@ public class LibraryService : ILibraryService
         var book = _db.Tbooks.Find(request.id);
 
         if (book == null)
-            throw new FaultException("Book not found.");
+            throw SoapFaults.NotFound("Book not found.");
 
         return new Book
         {
@@ -307,12 +319,13 @@ public class LibraryService : ILibraryService
     public Acknowledgement UpdateBook(UpdateBookRequest request)
     {
         if (request == null)
-            throw new FaultException("Request cannot be null.");
+            throw SoapFaults.Validation(
+                "Request cannot be null.");
 
         var book = _db.Tbooks.Find(request.id);
 
         if (book == null)
-            throw new FaultException("Book not found.");
+            throw SoapFaults.NotFound("Book not found.");
 
         ValidateBook(
             request.title,
@@ -338,7 +351,7 @@ public class LibraryService : ILibraryService
         var book = _db.Tbooks.Find(request.id);
 
         if (book == null)
-            throw new FaultException("Book not found.");
+            throw SoapFaults.NotFound("Book not found.");
 
         _db.Tbooks.Remove(book);
         _db.SaveChanges();
